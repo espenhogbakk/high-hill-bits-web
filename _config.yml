@@ -22,7 +22,7 @@ title: High Hill Bits
 email: hello@highhillbits.com
 description: >- # this means to ignore newlines until "baseurl:"
   High Hill Bits makes apps for Apple Platforms
-baseurl: ""
+baseurl: "/high-hill-bits-web/"
 url: "https://highhillbits.com"
 #plugins:
 #  - jekyll-feed

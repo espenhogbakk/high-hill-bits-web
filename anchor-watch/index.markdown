@@ -22,7 +22,7 @@ layout: default
         </p>
       </div>
       <div class="one-half column phones">
-        <img class="phone" src="{{site.base_url}}/anchor-watch/screenshot.png" />
+        <img class="phone" src="{{ site.baseurl }}/anchor-watch/screenshot.png" />
       </div>
     </div>
 

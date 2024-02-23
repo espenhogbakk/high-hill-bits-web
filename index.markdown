@@ -1,4 +1,6 @@
 ---
+title: "High Hill Bits"
+layout: default
 ---
 
-Welcome to My Home Page
+High Hill Bits

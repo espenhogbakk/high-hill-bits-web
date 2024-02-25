@@ -10,10 +10,8 @@ layout: default
       <h2>Apps</h2>
       <ul>
         <li><a href="./anchor-watch">Anchor Watch</a></li>
-          <!--
-          <li><a href="./sbms-monitor">SBMS Monitor</a></li>
-           -->
-        </ul>
+        <li><a href="./sbms-monitor">SBMS Monitor</a></li>
+      </ul>
     </div>
   </div>
 </div>

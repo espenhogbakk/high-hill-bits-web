@@ -1,12 +1,12 @@
 ---
-title: "Anchor Watch Terms of Use"
+title: "SBMS Monitor Terms of Use"
 layout: legal
 updated: 22.02.2024
 ---
 
 ## Plain English
 
-If you subscribe to Anchor Watch, you can use it, unfettered, until
+If you subscribe to SBMS Monitor, you can use it, unfettered, until
 that subscription period ends.
 
 ## Legal Speak
@@ -30,7 +30,7 @@ For the purposes of these Terms and Conditions:
 
 - <strong>Application</strong> means the software program provided
   by the Company downloaded by You on any electronic device, named
-  Anchor Watch
+  SBMS Monitor
 - <strong>Application Store</strong> means the digital distribution
   service operated and developed by Apple Inc. (Apple App Store) in
   which the Application has been downloaded.

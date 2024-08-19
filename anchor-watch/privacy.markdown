@@ -19,7 +19,7 @@ Some basic analytics are captured in a privacy-first way. These
 analytics are used to improve the app, and cannot be traced back to
 you.
 
-### Personally-Identifying Information<
+### Personally-Identifying Information
 
 Anchor Watch does not gather or transmit any Personally-Identifying
 Information outside of your local device. It only stores preferences

@@ -158,6 +158,10 @@ const setActiveAnchorLocation = async (record) => {
   // createSubscription for vessel location updates
   createSubscription(record);
   redrawOverlays(map, record);
+
+  // On first draw we want to set the camera distance
+  const radius = record.fields.CD_distance.value;
+  map.cameraDistance = radius * 5;
 };
 
 const updateLocationTrack = (map, coordinates) => {
@@ -192,7 +196,6 @@ const updateAlarmRegion = (map, record) => {
 
   // Add the circle overlay to the map
   map.center = coordinate;
-  map.cameraDistance = radius * 5;
   map.addOverlay(circle);
 };
 

@@ -1,5 +1,13 @@
 "use strict";
 
+// TODO - cleanup subscriptions (do we need them or is polling just as good?)
+// TODO - remove interval if no active alarm
+// TODO - Verify that alarm is active, and if not cleanup ^
+// TODO - Draw correct alarm zone
+// TODO - Draw polyline with correct colors
+// TODO - Draw zone with correct colors
+// TODO - Test out service-workers and push notifications even if app is in background
+
 // CloudKit Configuration
 CloudKit.configure({
   containers: [
@@ -109,14 +117,11 @@ const createSubscription = async (anchorLocation) => {
     console.error("Error creating subscription:", error);
   }
 
-  /*
-  const anchorLocationId = anchorLocation.recordName;
   pollingInterval = setInterval(async () => {
     const updatedRecords = await fetchVesselLocations(anchorLocationId);
     setVesselLocations(updatedRecords);
     redrawOverlays(map, anchorLocation);
   }, 5000); // Poll every 5 seconds
-  */
 };
 
 // Example click handler

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Anchor Watch Pro</title>
+
+    <!-- Include MapKit JS -->
+    <script
+      src="https://cdn.apple-mapkit.com/mk/5.x.x/mapkit.js"
+      defer
+    ></script>
+
+    <!-- Include CloudKit JS -->
+    <script
+      src="https://cdn.apple-cloudkit.com/ck/2/cloudkit.js"
+      defer
+    ></script>
+
+    <!-- Import Configurations and App Logic -->
+    <script type="module" src="./config.js" defer></script>
+    <script type="module" src="./app.js" defer></script>
+
+    <!-- Import Web Components -->
+    <script type="module" src="./components/index.js" defer></script>
+  </head>
+  <body>
+    <!-- Components -->
+    <user-info></user-info>
+    <alarm-list></alarm-list>
+    <map-view></map-view>
+  </body>
+</html>

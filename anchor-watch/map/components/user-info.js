@@ -15,6 +15,25 @@ class UserInfo extends HTMLElement {
           background: rgba(255, 255, 255, 1);
           padding: 100px;
           border-radius: 5px;
+
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+        }
+
+        #authentication-buttons #login-info {
+          margin-bottom: 30px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+        }
+
+        #authentication-buttons #login-info #logo {
+          width: 200px;
+          margin-bottom: 50px;
         }
 
         #authentication-buttons.authenticated {
@@ -27,8 +46,18 @@ class UserInfo extends HTMLElement {
           left: 5px;
         }
 
+        #authentication-buttons.authenticated #login-info {
+          display: none;
+        }
+
       </style>
       <div id="authentication-buttons">
+        <div id="login-info">
+          <img id="logo" src="./assets/icon.png" />
+          <p>
+            Please log in using your Apple ID to see your alarm.
+          </p>
+        </div>
         <div id="apple-sign-in-button"></div>
         <div id="apple-sign-out-button"></div>
       </div>

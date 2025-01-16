@@ -5,15 +5,31 @@ class MapView extends HTMLElement {
   constructor() {
     super();
     this.map = null;
+    this._alarm = null;
   }
 
   connectedCallback() {
-    this.innerHTML = `<h2>Alarm View</h2><div id="map" style="width: 100%; height: 500px"></div>`;
-    this.initMap();
+    this.innerHTML = `
+      <style>
+        #map {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100vh;
+        }
+      </style>
 
-    window.addEventListener("alarm-selected", (event) => {
-      this.updateMap(event.detail);
-    });
+      <div id="map"></div>`;
+    this.initMap();
+  }
+
+  set alarm(value) {
+    this._alarm = value;
+  }
+
+  get alarm() {
+    return this._data;
   }
 
   initMap() {
@@ -27,9 +43,13 @@ class MapView extends HTMLElement {
       center: new mapkit.Coordinate(37.7749, -122.4194),
       cameraDistance: 1000,
     });
+
+    this.render();
   }
 
-  async updateMap(alarm) {
+  async render() {
+    // Draw the alarm zone on the map
+    const alarm = this._alarm;
     const lat = alarm.fields.CD_latitude.value;
     const lon = alarm.fields.CD_longitude.value;
     const radius = alarm.fields.CD_distance.value;
@@ -52,7 +72,12 @@ class MapView extends HTMLElement {
     });
     this.map.addOverlay(circle);
 
-    // Create and add the polyline overlay
+    // Update the track
+    this.updateTrack(alarm);
+  }
+
+  async updateTrack(alarm) {
+    // Fetch vessel locations for this alarm
     const coordinates = await fetchVesselLocations(alarm.recordName).then(
       (locations) =>
         locations.map(
@@ -64,6 +89,7 @@ class MapView extends HTMLElement {
         )
     );
 
+    // Create and add the polyline overlay
     const polyline = new mapkit.PolylineOverlay(coordinates);
     polyline.style = new mapkit.Style({
       strokeColor: "#0000ff",

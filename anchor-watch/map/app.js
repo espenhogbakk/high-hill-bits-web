@@ -27,6 +27,21 @@ export const container = CloudKit.getDefaultContainer();
 export const database = container.privateCloudDatabase;
 
 export async function initializeAuth() {
+  // Handle user signing in
+  container.whenUserSignsIn().then((userIdentity) => {
+    dispatchEvent(new CustomEvent("user-logged-in", { bubbles: true }));
+  });
+
+  // Handle user signing out
+  container.whenUserSignsOut().then(() => {
+    dispatchEvent(new CustomEvent("user-logged-out", { bubbles: true }));
+  });
+
+  // Setup authentication using CloudKit
   const userIdentity = await container.setUpAuth();
   return userIdentity;
 }
+
+(async () => {
+  await initializeAuth();
+})();

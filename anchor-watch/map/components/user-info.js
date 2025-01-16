@@ -3,50 +3,44 @@ class UserInfo extends HTMLElement {
     // Use innerHTML to inject content into the global DOM
     this.innerHTML = `
       <style>
-        #user-info {
-          margin: 20px;
+        #authentication-buttons {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: auto;
+          height: auto;
+
+          display: block;
+          background: rgba(255, 255, 255, 1);
+          padding: 100px;
+          border-radius: 5px;
         }
+
+        #authentication-buttons.authenticated {
+          transform: translate(0, 0);
+          padding: 10px;
+          height: 40px;
+
+          top: auto;
+          bottom: 5px;
+          left: 5px;
+        }
+
       </style>
-      <div id="user-info">
-        <p id="user-name">Unauthenticated User</p>
+      <div id="authentication-buttons">
         <div id="apple-sign-in-button"></div>
         <div id="apple-sign-out-button"></div>
       </div>
     `;
 
-    this.userNameElement = this.querySelector("#user-name");
-
-    // Initialize CloudKit authentication state
-    this.initializeAuthState();
-  }
-
-  initializeAuthState() {
-    const container = CloudKit.getDefaultContainer();
-
-    // Handle user signing in
-    container.whenUserSignsIn().then((userIdentity) => {
-      const name = userIdentity.userRecordName;
-      this.updateUI(true, name);
-      this.dispatchEvent(
-        new CustomEvent("user-authenticated", { bubbles: true })
-      );
+    this.authenticationButtons = this.querySelector("#authentication-buttons");
+    window.addEventListener("user-logged-in", () => {
+      this.authenticationButtons.classList.add("authenticated");
     });
-
-    // Handle user signing out
-    container.whenUserSignsOut().then(() => {
-      this.updateUI(false);
+    window.addEventListener("user-logged-out", () => {
+      this.authenticationButtons.classList.remove("authenticated");
     });
-
-    // Initial auth state
-    container.setUpAuth().then((userIdentity) => {
-      if (!userIdentity) {
-        this.updateUI(false);
-      }
-    });
-  }
-
-  updateUI(isAuthenticated, userName = "Unauthenticated User") {
-    this.userNameElement.textContent = userName;
   }
 }
 

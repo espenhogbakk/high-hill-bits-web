@@ -6,6 +6,10 @@ export async function fetchAlarms() {
     "CD_latitude",
     "CD_longitude",
     "CD_distance",
+    "CD_bigDistance",
+    "CD_startAngle",
+    "CD_endAngle",
+    "CD_modeRaw",
     "CD_statusRaw",
     "CD_timestamp",
   ];
@@ -15,8 +19,8 @@ export async function fetchAlarms() {
     filterBy: [
       {
         fieldName: "CD_statusRaw",
-        comparator: "NOT_EQUALS",
-        fieldValue: { value: "draft" },
+        comparator: "EQUALS",
+        fieldValue: { value: "active" },
       },
     ],
     sortBy: [{ fieldName: "CD_timestamp", ascending: true }],

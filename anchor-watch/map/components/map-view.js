@@ -41,10 +41,12 @@ class MapView extends HTMLElement {
     });
 
     const alarm = this._alarm;
-    const radius = alarm.fields.CD_distance.value;
+    const distance = alarm.fields.CD_distance?.value;
+    const bigDistance = alarm.fields.CD_bigDistance?.value;
+    const largestRadius = Math.max(distance, bigDistance);
     this.map = new mapkit.Map("map", {
       center: new mapkit.Coordinate(37.7749, -122.4194),
-      cameraDistance: radius * 2.5,
+      cameraDistance: largestRadius * 2.5,
     });
 
     this.render();
@@ -55,7 +57,6 @@ class MapView extends HTMLElement {
     const alarm = this._alarm;
     const lat = alarm.fields.CD_latitude.value;
     const lon = alarm.fields.CD_longitude.value;
-    const radius = alarm.fields.CD_distance.value;
 
     const alarmCoordinate = new mapkit.Coordinate(lat, lon);
     this.map.center = alarmCoordinate;
@@ -64,19 +65,22 @@ class MapView extends HTMLElement {
     this.map.overlays = [];
 
     // Create and add the circle overlay
-    const circle = new mapkit.CircleOverlay(
-      new mapkit.Coordinate(lat, lon),
-      radius
-    );
-    // We can modify this style after it's added as an overlay
-    // and mapkit should re-render it...
-    circle.style = new mapkit.Style({
-      lineWidth: 2,
-      strokeColor: StatusColor.active,
-      fillColor: StatusColor.active,
-      fillOpacity: 0.3,
-    });
-    this.map.addOverlay(circle);
+    let overlay;
+    switch (alarm.fields.CD_modeRaw.value) {
+      case "simple": {
+        overlay = this.createCircularShape(alarm);
+        break;
+      }
+      case "advanced": {
+        overlay = this.createAdvancedCircularShape(alarm);
+        break;
+      }
+      default: {
+        overlay = this.createCircularShape(alarm);
+        break;
+      }
+    }
+    this.map.addOverlay(overlay);
 
     // Center dot
     const centerDot = new mapkit.CircleOverlay(
@@ -92,6 +96,111 @@ class MapView extends HTMLElement {
 
     // Update the track
     this.updateTrack(alarm);
+  }
+
+  createCircularShape(alarm) {
+    const lat = alarm.fields.CD_latitude.value;
+    const lon = alarm.fields.CD_longitude.value;
+    const radius = alarm.fields.CD_distance.value;
+
+    const circle = new mapkit.CircleOverlay(
+      new mapkit.Coordinate(lat, lon),
+      radius
+    );
+    // We can modify this style after it's added as an overlay
+    // and mapkit should re-render it...
+    circle.style = new mapkit.Style({
+      lineWidth: 2,
+      strokeColor: StatusColor.active,
+      fillColor: StatusColor.active,
+      fillOpacity: 0.3,
+    });
+
+    return circle;
+  }
+
+  createAdvancedCircularShape(alarm) {
+    const lat = alarm.fields.CD_latitude.value;
+    const lon = alarm.fields.CD_longitude.value;
+    const distance = alarm.fields.CD_distance.value;
+    const bigDistance = alarm.fields.CD_bigDistance.value;
+    const startAngle = alarm.fields.CD_startAngle.value;
+    const endAngle = alarm.fields.CD_endAngle.value;
+
+    function calculateNumPoints(radius, resolution = 2) {
+      const minPoints = 100; // Minimum number of points for small circles
+      return Math.max(
+        minPoints,
+        Math.round((2 * Math.PI * radius) / resolution)
+      );
+    }
+
+    // Function to generate circle points
+    function generateCircleWithTwoRadii(
+      center,
+      distance,
+      bigDistance,
+      startAngle,
+      endAngle,
+      numPoints = 360
+    ) {
+      const earthRadius = 6371000; // Earth's radius in meters
+      const coordinates = [];
+      const toRadians = (degrees) => (degrees * Math.PI) / 180;
+
+      // Normalize angles to ensure they're within 0°–360°
+      startAngle = startAngle % 360;
+      endAngle = endAngle % 360;
+
+      // Generate points for the full circle
+      for (let i = 0; i < numPoints; i++) {
+        const angleDegrees = (360 / numPoints) * i;
+        const angle = toRadians(angleDegrees);
+
+        // Check if the angle is within the bigDistance range, accounting for wrapping
+        const inBigDistanceRange =
+          startAngle <= endAngle
+            ? angleDegrees >= startAngle && angleDegrees <= endAngle // Normal case
+            : angleDegrees >= startAngle || angleDegrees <= endAngle; // Wrapping case
+
+        // Use bigDistance for the active range, distance otherwise
+        const currentRadius = inBigDistanceRange ? bigDistance : distance;
+
+        const latitude =
+          center.latitude +
+          (currentRadius / earthRadius) * Math.cos(angle) * (180 / Math.PI);
+        const longitude =
+          center.longitude +
+          ((currentRadius / earthRadius) * Math.sin(angle) * (180 / Math.PI)) /
+            Math.cos(center.latitude * (Math.PI / 180));
+
+        coordinates.push(new mapkit.Coordinate(latitude, longitude));
+      }
+
+      // Close the circle
+      coordinates.push(coordinates[0]);
+
+      return coordinates;
+    }
+
+    const numPoints = calculateNumPoints(bigDistance);
+    const coordinates = generateCircleWithTwoRadii(
+      new mapkit.Coordinate(lat, lon),
+      distance,
+      bigDistance,
+      startAngle,
+      endAngle,
+      numPoints
+    );
+    const overlay = new mapkit.PolygonOverlay(coordinates);
+    overlay.style = new mapkit.Style({
+      lineWidth: 2,
+      strokeColor: StatusColor.active,
+      fillColor: StatusColor.active,
+      fillOpacity: 0.3,
+    });
+
+    return overlay;
   }
 
   async updateTrack(alarm) {

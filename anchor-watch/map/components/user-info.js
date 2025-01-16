@@ -1,6 +1,5 @@
 class UserInfo extends HTMLElement {
   connectedCallback() {
-    // Use innerHTML to inject content into the global DOM
     this.innerHTML = `
       <style>
         #authentication-buttons {

@@ -1,4 +1,5 @@
 import { fetchVesselLocations } from "../queries/index.js";
+import { StatusColor } from "../lib/index.js";
 import { MAPKIT_TOKEN } from "../config.js";
 
 class MapView extends HTMLElement {
@@ -39,9 +40,11 @@ class MapView extends HTMLElement {
       },
     });
 
+    const alarm = this._alarm;
+    const radius = alarm.fields.CD_distance.value;
     this.map = new mapkit.Map("map", {
       center: new mapkit.Coordinate(37.7749, -122.4194),
-      cameraDistance: 1000,
+      cameraDistance: radius * 2.5,
     });
 
     this.render();
@@ -65,12 +68,27 @@ class MapView extends HTMLElement {
       new mapkit.Coordinate(lat, lon),
       radius
     );
+    // We can modify this style after it's added as an overlay
+    // and mapkit should re-render it...
     circle.style = new mapkit.Style({
       lineWidth: 2,
-      strokeColor: "#ff0000",
-      fillColor: "rgba(255, 0, 0, 0.3)",
+      strokeColor: StatusColor.active,
+      fillColor: StatusColor.active,
+      fillOpacity: 0.3,
     });
     this.map.addOverlay(circle);
+
+    // Center dot
+    const centerDot = new mapkit.CircleOverlay(
+      new mapkit.Coordinate(lat, lon),
+      1
+    );
+    centerDot.style = new mapkit.Style({
+      lineWidth: 0,
+      fillColor: StatusColor.active,
+      fillOpacity: 0.8,
+    });
+    this.map.addOverlay(centerDot);
 
     // Update the track
     this.updateTrack(alarm);
@@ -92,9 +110,9 @@ class MapView extends HTMLElement {
     // Create and add the polyline overlay
     const polyline = new mapkit.PolylineOverlay(coordinates);
     polyline.style = new mapkit.Style({
-      strokeColor: "#0000ff",
-      lineWidth: 3,
-      lineDash: [6, 4],
+      strokeColor: StatusColor.draft,
+      lineWidth: 5,
+      lineCap: "square",
     });
     this.map.addOverlay(polyline);
   }

@@ -52,7 +52,7 @@ class UserInfo extends HTMLElement {
       </style>
       <div id="authentication-buttons">
         <div id="login-info">
-          <img id="logo" src="./assets/icon.png" />
+          <img id="logo" src="/images/anchor-watch/icon.png" />
           <p>
             Please log in using your Apple ID to see your alarm.
           </p>

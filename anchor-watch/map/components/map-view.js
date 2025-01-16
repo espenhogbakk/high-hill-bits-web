@@ -9,6 +9,7 @@ class MapView extends HTMLElement {
     this._alarm = null;
     this.trackOverlay = null;
     this.trackInterval = null;
+    this.shipOverlay = null;
   }
 
   connectedCallback() {
@@ -43,11 +44,14 @@ class MapView extends HTMLElement {
     });
 
     const alarm = this._alarm;
+    const lat = alarm.fields.CD_latitude.value;
+    const lon = alarm.fields.CD_longitude.value;
     const distance = alarm.fields.CD_distance?.value;
     const bigDistance = alarm.fields.CD_bigDistance?.value;
     const largestRadius = Math.max(distance, bigDistance);
+    const anchorLocation = new mapkit.Coordinate(lat, lon);
     this.map = new mapkit.Map("map", {
-      center: new mapkit.Coordinate(37.7749, -122.4194),
+      center: anchorLocation,
       cameraDistance: largestRadius * 2.5,
     });
 
@@ -126,6 +130,20 @@ class MapView extends HTMLElement {
     });
 
     return circle;
+  }
+
+  createShipOverlay(coordinate) {
+    const shipOverlay = new mapkit.CircleOverlay(coordinate, 1);
+    // We can modify this style after it's added as an overlay
+    // and mapkit should re-render it...
+    shipOverlay.style = new mapkit.Style({
+      lineWidth: 2,
+      strokeColor: "#FFFFFF",
+      fillColor: "#5856CF",
+      fillOpacity: 1,
+    });
+
+    return shipOverlay;
   }
 
   createAdvancedCircularShape(alarm) {
@@ -230,6 +248,10 @@ class MapView extends HTMLElement {
       this.map.removeOverlay(this.trackOverlay);
     }
 
+    if (this.shipOverlay) {
+      this.map.removeOverlay(this.shipOverlay);
+    }
+
     // Create and add the polyline overlay
     const trackOverlay = new mapkit.PolylineOverlay(coordinates);
     trackOverlay.style = new mapkit.Style({
@@ -239,6 +261,10 @@ class MapView extends HTMLElement {
     });
     this.trackOverlay = trackOverlay;
     this.map.addOverlay(this.trackOverlay);
+
+    const shipOverlay = this.createShipOverlay(coordinates.at(-1));
+    this.shipOverlay = shipOverlay;
+    this.map.addOverlay(shipOverlay);
   }
 }
 

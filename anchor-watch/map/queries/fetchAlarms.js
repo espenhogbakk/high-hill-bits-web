@@ -23,7 +23,7 @@ export async function fetchAlarms() {
         fieldValue: { value: "active" },
       },
     ],
-    sortBy: [{ fieldName: "CD_timestamp", ascending: true }],
+    sortBy: [{ fieldName: "CD_timestamp", ascending: false }],
   };
 
   const options = {

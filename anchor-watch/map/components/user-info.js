@@ -9,6 +9,8 @@ class UserInfo extends HTMLElement {
           transform: translate(-50%, -50%);
           width: auto;
           height: auto;
+          max-width: 90%;
+          box-sizing: border-box;
 
           display: block;
           background: rgba(255, 255, 255, 1);
@@ -28,6 +30,7 @@ class UserInfo extends HTMLElement {
           align-items: center;
           justify-content: center;
           text-align: center;
+          line-height: 1.25em;
         }
 
         #authentication-buttons #login-info #logo {

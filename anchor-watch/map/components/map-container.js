@@ -65,6 +65,8 @@ class MapContainer extends HTMLElement {
   async loadAlarms() {
     const alarms = await fetchAlarms();
 
+    // TODO - Add subscriber to watch for new active alarms
+
     if (!alarms.length) {
       // Show message about no active alarms
       this.infoElement.style.display = "block";

@@ -7,6 +7,8 @@ class MapView extends HTMLElement {
     super();
     this.map = null;
     this._alarm = null;
+    this.trackOverlay = null;
+    this.trackInterval = null;
   }
 
   connectedCallback() {
@@ -96,6 +98,13 @@ class MapView extends HTMLElement {
 
     // Update the track
     this.updateTrack(alarm);
+
+    // Update every n seconds
+    if (!this.trackInterval) {
+      this.trackInterval = setInterval(() => {
+        this.updateTrack(alarm);
+      }, 3000);
+    }
   }
 
   createCircularShape(alarm) {
@@ -216,14 +225,20 @@ class MapView extends HTMLElement {
         )
     );
 
+    // If we already have track overlay, we want to remove it first
+    if (this.trackOverlay) {
+      this.map.removeOverlay(this.trackOverlay);
+    }
+
     // Create and add the polyline overlay
-    const polyline = new mapkit.PolylineOverlay(coordinates);
-    polyline.style = new mapkit.Style({
+    const trackOverlay = new mapkit.PolylineOverlay(coordinates);
+    trackOverlay.style = new mapkit.Style({
       strokeColor: StatusColor.draft,
       lineWidth: 5,
       lineCap: "square",
     });
-    this.map.addOverlay(polyline);
+    this.trackOverlay = trackOverlay;
+    this.map.addOverlay(this.trackOverlay);
   }
 }
 

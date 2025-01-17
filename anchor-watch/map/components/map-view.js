@@ -120,7 +120,7 @@ class MapView extends HTMLElement {
         // Only update if last update is older than 20 seconds or if it's the first update
         if (
           this.lastUpdate === null ||
-          Date.now() - this.lastUpdate > 20 * 1000
+          Date.now() - this.lastUpdate > 3 * 1000
         ) {
           this.updateTrack(alarm);
         }

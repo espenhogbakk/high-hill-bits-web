@@ -359,7 +359,7 @@ class MapView extends HTMLElement {
     this.trackOverlay = trackOverlay;
     this.map.addOverlay(this.trackOverlay);
 
-    const shipOverlay = this.createShipOverlay(coordinates.at(-1));
+    const shipOverlay = this.createShipOverlay(coordinates.at(0));
     this.shipOverlay = shipOverlay;
     this.map.addOverlay(shipOverlay);
   }

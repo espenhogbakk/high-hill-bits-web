@@ -30,7 +30,6 @@ class UserInfo extends HTMLElement {
           align-items: center;
           justify-content: center;
           text-align: center;
-          line-height: 1.25em;
         }
 
         #authentication-buttons #login-info #logo {

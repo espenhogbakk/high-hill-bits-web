@@ -1,6 +1,7 @@
 import { fetchVesselLocations } from "../queries/index.js";
 import { StatusColor } from "../lib/index.js";
 import { MAPKIT_TOKEN } from "../config.js";
+import { database, container } from "../app.js";
 
 class MapView extends HTMLElement {
   constructor() {
@@ -10,6 +11,8 @@ class MapView extends HTMLElement {
     this.trackOverlay = null;
     this.trackInterval = null;
     this.shipOverlay = null;
+    this.lastUpdate = null;
+    this.subscriptionId = null;
   }
 
   connectedCallback() {
@@ -102,12 +105,105 @@ class MapView extends HTMLElement {
 
     // Update the track
     this.updateTrack(alarm);
+    this.initLiveUpdates(alarm);
+  }
 
-    // Update every n seconds
+  async initLiveUpdates(alarm) {
+    // Set up the CloudKit subscription for live updates
+    await this.setupCloudKitSubscription(alarm);
+
+    // Add a fallback to every n seconds if no update has happened in a while
     if (!this.trackInterval) {
       this.trackInterval = setInterval(() => {
-        this.updateTrack(alarm);
-      }, 3000);
+        // Only update if last update is older than 20 seconds or if it's the first update
+        if (
+          this.lastUpdate === null ||
+          Date.now() - this.lastUpdate > 20 * 1000
+        ) {
+          this.updateTrack(alarm);
+        }
+      }, 1000);
+    }
+  }
+
+  async setupCloudKitSubscription(alarm) {
+    // Fetch all existing subscriptions first
+    const existingSubscriptions = await this.fetchOldSubscriptions();
+
+    // Delete all subscriptions that match the query for CD_VesselLocation
+    if (existingSubscriptions.length) {
+      await this.deleteSubscriptions(existingSubscriptions);
+    }
+
+    // Now create a new subscription for CD_VesselLocation
+    const subscription = {
+      subscriptionType: "query",
+      zoneID: { zoneName: "com.apple.coredata.cloudkit.zone" },
+      firesOn: ["create"],
+      notificationInfo: {
+        alertBody: "A new vessel location was added",
+      },
+      query: {
+        recordType: "CD_VesselLocation",
+        filterBy: [
+          {
+            fieldName: "CD_anchorLocation",
+            comparator: "EQUALS",
+            fieldValue: { value: alarm.recordName },
+          },
+        ],
+        sortBy: [{ fieldName: "CD_timestamp", ascending: false }],
+      },
+    };
+
+    try {
+      // Add the subscription to CloudKit
+      const response = await database.saveSubscriptions(subscription);
+      this.subscriptionId = response.subscriptionID; // Store the subscription ID
+      this.setupCloudKitNotifications(alarm);
+    } catch (error) {
+      console.error("Error adding CloudKit subscription:", error);
+    }
+  }
+
+  async setupCloudKitNotifications(alarm) {
+    const currentSubscriptionId = this.subscriptionId;
+    const updateTrack = this.updateTrack;
+    container.addNotificationListener((notification) => {
+      if (notification?.subscriptionID === currentSubscriptionId) {
+        updateTrack.call(this, alarm);
+      }
+    });
+  }
+
+  async fetchOldSubscriptions() {
+    try {
+      // Fetch all existing subscriptions
+      const response = await database.fetchAllSubscriptions();
+      if (!response.subscriptions) {
+        return [];
+      }
+      const querySubscriptions = response.subscriptions
+        .filter((s) => {
+          return (
+            s.subscriptionType === "query" &&
+            s.query.recordType === "CD_VesselLocation"
+          );
+        })
+        .map((s) => s.subscriptionID);
+      return querySubscriptions;
+    } catch (error) {
+      console.error("Error fetching subscriptions:", error);
+      return [];
+    }
+  }
+
+  async deleteSubscriptions(subscriptionIds) {
+    try {
+      // Loop through the subscriptions and delete those related to the CD_VesselLocation query
+      await database.deleteSubscriptions(subscriptionIds);
+    } catch (error) {
+      console.error("Error deleting subscriptions:", error);
     }
   }
 
@@ -231,6 +327,7 @@ class MapView extends HTMLElement {
   }
 
   async updateTrack(alarm) {
+    this.lastUpdate = Date.now();
     // Fetch vessel locations for this alarm
     const coordinates = await fetchVesselLocations(alarm.recordName).then(
       (locations) =>

@@ -24,6 +24,7 @@ CloudKit.configure({
 });
 
 export const container = CloudKit.getDefaultContainer();
+container.registerForNotifications();
 export const database = container.privateCloudDatabase;
 
 export async function initializeAuth() {

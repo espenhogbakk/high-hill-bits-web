@@ -89,6 +89,7 @@ class MapView extends HTMLElement {
         break;
       }
     }
+    overlay.enabled = false;
     this.map.addOverlay(overlay);
 
     // Center dot
@@ -96,6 +97,7 @@ class MapView extends HTMLElement {
       new mapkit.Coordinate(lat, lon),
       1
     );
+    centerDot.enabled = false;
     centerDot.style = new mapkit.Style({
       lineWidth: 0,
       fillColor: StatusColor.active,
@@ -357,9 +359,11 @@ class MapView extends HTMLElement {
       lineCap: "square",
     });
     this.trackOverlay = trackOverlay;
+    trackOverlay.enabled = false;
     this.map.addOverlay(this.trackOverlay);
 
     const shipOverlay = this.createShipOverlay(coordinates.at(0));
+    shipOverlay.enabled = false;
     this.shipOverlay = shipOverlay;
     this.map.addOverlay(shipOverlay);
   }

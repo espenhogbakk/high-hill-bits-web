@@ -39,7 +39,7 @@ class UserInfo extends HTMLElement {
 
         #authentication-buttons.authenticated {
           transform: translate(0, 0);
-          padding: 10px;
+          padding: 30px 10px;
           height: 40px;
 
           top: auto;
@@ -50,8 +50,8 @@ class UserInfo extends HTMLElement {
         #authentication-buttons.authenticated #login-info {
           display: none;
         }
-
       </style>
+
       <div id="authentication-buttons">
         <div id="login-info">
           <img id="logo" src="/images/anchor-watch/icon.png" />

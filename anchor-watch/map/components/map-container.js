@@ -49,6 +49,7 @@ class MapContainer extends HTMLElement {
     window.addEventListener("alarm-activated", (event) =>
       this.addMap(event.detail)
     );
+    window.addEventListener("alarm-deactivated", (event) => this.removeMap());
   }
 
   addMap(alarm) {
@@ -135,8 +136,15 @@ class MapContainer extends HTMLElement {
     this.selectAlarm(activeAlarm);
   }
 
+  deselectAlarm(alarm) {
+    const event = new CustomEvent("alarm-deactivated");
+    this.anchorLocationId = null;
+    window.dispatchEvent(event);
+  }
+
   selectAlarm(alarm) {
     const event = new CustomEvent("alarm-activated", { detail: alarm });
+    this.anchorLocationId = alarm.recordName;
     window.dispatchEvent(event);
   }
 

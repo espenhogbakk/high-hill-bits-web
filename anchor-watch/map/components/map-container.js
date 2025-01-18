@@ -97,6 +97,7 @@ class MapContainer extends HTMLElement {
 
         // If we don't have active anchorLocationId we want to poll often so that the
         // websites updates quicly after they activate an alarm
+        // TODO - use a form of exponential backoff, with a max limit
         if (
           (this.lastUpdate === null ||
             Date.now() - this.lastUpdate > 3 * 1000) &&

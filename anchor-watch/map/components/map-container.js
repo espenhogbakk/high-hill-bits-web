@@ -117,6 +117,8 @@ class MapContainer extends HTMLElement {
     const alarms = await fetchAlarms();
 
     if (!alarms.length) {
+      // Show message about no active alarms
+      this.infoElement.style.display = "block";
       this.deselectAlarm();
       return;
     }
@@ -127,6 +129,8 @@ class MapContainer extends HTMLElement {
     });
 
     if (!activeAlarm) {
+      // Show message about no active alarms
+      this.infoElement.style.display = "block";
       this.deselectAlarm();
       return;
     }

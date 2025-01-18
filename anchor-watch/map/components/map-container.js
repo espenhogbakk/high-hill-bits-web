@@ -134,12 +134,14 @@ class MapContainer extends HTMLElement {
     this.selectAlarm(activeAlarm);
   }
 
-  deselectAlarm(alarm) {
-    // Show message about no active alarms
-    this.infoElement.style.display = "block";
-    const event = new CustomEvent("alarm-deactivated");
-    this.anchorLocationId = null;
-    window.dispatchEvent(event);
+  deselectAlarm() {
+    if (this.anchorLocationId) {
+      // Show message about no active alarms
+      this.infoElement.style.display = "block";
+      const event = new CustomEvent("alarm-deactivated");
+      this.anchorLocationId = null;
+      window.dispatchEvent(event);
+    }
   }
 
   selectAlarm(alarm) {

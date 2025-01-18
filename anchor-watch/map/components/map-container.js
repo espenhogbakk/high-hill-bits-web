@@ -7,6 +7,8 @@ class MapContainer extends HTMLElement {
     this.mapView = null;
     this.subscriptionId = null;
     this.anchorLocationId = null;
+    this.interval = null;
+    this.lastUpdate = null;
   }
 
   connectedCallback() {
@@ -50,6 +52,7 @@ class MapContainer extends HTMLElement {
   }
 
   addMap(alarm) {
+    console.log("addMap:", alarm);
     if (this.mapView) {
       // If we already have the same alarm added we don't
       // want to do anything.
@@ -74,13 +77,42 @@ class MapContainer extends HTMLElement {
   }
 
   async init() {
-    await this.setupCloudKitSubscription();
+    //await this.setupCloudKitSubscription();
+    // Add a fallback to every n seconds if no update has happened in a while
+    if (!this.interval) {
+      this.interval = setInterval(async () => {
+        console.log("interval");
+        // If we have an anchorLocationId we want to poll less often since we just
+        // want to automatically remove the map after an alarm is stopped, users are
+        // less likely to have the website open in that point.
+        if (
+          (this.lastUpdate === null ||
+            Date.now() - this.lastUpdate > 30 * 1000) &&
+          this.anchorLocationId
+        ) {
+          console.log("active alarm");
+          await this.loadAlarms();
+        }
+
+        // If we don't have active anchorLocationId we want to poll often so that the
+        // websites updates quicly after they activate an alarm
+        if (
+          (this.lastUpdate === null ||
+            Date.now() - this.lastUpdate > 3 * 1000) &&
+          !this.anchorLocationId
+        ) {
+          console.log("no active alarm");
+          await this.loadAlarms();
+        }
+      }, 1000);
+    }
     await this.loadAlarms();
   }
 
   // Responsible for loading alarms from CloudKit and if we find an active one
   // we want to add the map
   async loadAlarms() {
+    this.lastUpdate = Date.now();
     const alarms = await fetchAlarms();
 
     if (!alarms.length) {
@@ -109,8 +141,11 @@ class MapContainer extends HTMLElement {
   }
 
   async setupCloudKitSubscription() {
+    console.log("setupCloudKitSubscription");
     // Fetch all existing subscriptions first
     const existingSubscriptions = await this.fetchOldSubscriptions();
+    console.log("existingSubscriptions:", existingSubscriptions);
+
     // Delete all subscriptions that match the query for CD_VesselLocation
     if (existingSubscriptions.length) {
       await this.deleteSubscriptions(existingSubscriptions);
@@ -150,6 +185,7 @@ class MapContainer extends HTMLElement {
   async setupCloudKitNotifications() {
     const currentSubscriptionId = this.subscriptionId;
     container.addNotificationListener((notification) => {
+      console.log("UPDATE TO ALARMS:", notification);
       if (notification?.subscriptionID === currentSubscriptionId) {
         console.log("loadAlarms");
         this.loadAlarms.call(this);

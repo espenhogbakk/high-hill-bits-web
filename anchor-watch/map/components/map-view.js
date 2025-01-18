@@ -112,15 +112,15 @@ class MapView extends HTMLElement {
 
   async initLiveUpdates(alarm) {
     // Set up the CloudKit subscription for live updates
-    await this.setupCloudKitSubscription(alarm);
+    //await this.setupCloudKitSubscription(alarm);
 
     // Add a fallback to every n seconds if no update has happened in a while
     if (!this.trackInterval) {
       this.trackInterval = setInterval(() => {
-        // Only update if last update is older than 20 seconds or if it's the first update
+        // Only update if last update is older than n seconds or if it's the first update
         if (
           this.lastUpdate === null ||
-          Date.now() - this.lastUpdate > 3 * 1000
+          Date.now() - this.lastUpdate > 5 * 1000
         ) {
           this.updateTrack(alarm);
         }

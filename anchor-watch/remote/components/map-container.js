@@ -1,5 +1,5 @@
 import { fetchAlarms } from "../queries/index.js";
-import { database, container } from "../app.js";
+import { store, database, container } from "../app.js";
 
 class MapContainer extends HTMLElement {
   constructor() {
@@ -46,14 +46,17 @@ class MapContainer extends HTMLElement {
 
     window.addEventListener("user-logged-in", () => this.init());
     window.addEventListener("user-logged-out", () => this.removeMap());
-    window.addEventListener("alarm-activated", (event) =>
-      this.addMap(event.detail)
-    );
-    window.addEventListener("alarm-deactivated", (event) => this.removeMap());
+    window.addEventListener("alarm-activated", (event) => {
+      store.activeAlarm = event.detail;
+      this.addMap(event.detail);
+    });
+    window.addEventListener("alarm-deactivated", () => {
+      store.activeAlarm = null;
+      this.removeMap();
+    });
   }
 
   addMap(alarm) {
-    console.log("addMap:", alarm);
     if (this.mapView) {
       // If we already have the same alarm added we don't
       // want to do anything.
@@ -82,7 +85,6 @@ class MapContainer extends HTMLElement {
     // Add a fallback to every n seconds if no update has happened in a while
     if (!this.interval) {
       this.interval = setInterval(async () => {
-        console.log("interval");
         // If we have an anchorLocationId we want to poll less often since we just
         // want to automatically remove the map after an alarm is stopped, users are
         // less likely to have the website open in that point.
@@ -91,7 +93,6 @@ class MapContainer extends HTMLElement {
             Date.now() - this.lastUpdate > 30 * 1000) &&
           this.anchorLocationId
         ) {
-          console.log("active alarm");
           await this.loadAlarms();
         }
 
@@ -103,7 +104,6 @@ class MapContainer extends HTMLElement {
             Date.now() - this.lastUpdate > 3 * 1000) &&
           !this.anchorLocationId
         ) {
-          console.log("no active alarm");
           await this.loadAlarms();
         }
       }, 1000);
@@ -156,10 +156,8 @@ class MapContainer extends HTMLElement {
   }
 
   async setupCloudKitSubscription() {
-    console.log("setupCloudKitSubscription");
     // Fetch all existing subscriptions first
     const existingSubscriptions = await this.fetchOldSubscriptions();
-    console.log("existingSubscriptions:", existingSubscriptions);
 
     // Delete all subscriptions that match the query for CD_VesselLocation
     if (existingSubscriptions.length) {
@@ -200,9 +198,7 @@ class MapContainer extends HTMLElement {
   async setupCloudKitNotifications() {
     const currentSubscriptionId = this.subscriptionId;
     container.addNotificationListener((notification) => {
-      console.log("UPDATE TO ALARMS:", notification);
       if (notification?.subscriptionID === currentSubscriptionId) {
-        console.log("loadAlarms");
         this.loadAlarms.call(this);
       }
     });

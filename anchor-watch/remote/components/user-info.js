@@ -7,29 +7,33 @@ class UserInfo extends HTMLElement {
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          width: auto;
-          height: auto;
-          max-width: 90%;
+          width: 90%;
           box-sizing: border-box;
 
           display: block;
           background: rgba(255, 255, 255, 1);
-          padding: 100px;
+          padding: 20px 10px;
           border-radius: 5px;
 
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
+          text-align: center;
         }
 
         #authentication-buttons #login-info {
           margin-bottom: 30px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
+        }
+
+        #apple-sign-in-button {
+          text-align: start;
+        }
+
+        #authentication-buttons .disclaimer {
+          margin-top: 50px;
+          font-size: 12px;
+          opacity: 0.7;
         }
 
         #authentication-buttons #login-info #logo {
@@ -38,16 +42,6 @@ class UserInfo extends HTMLElement {
         }
 
         #authentication-buttons.authenticated {
-          transform: translate(0, 0);
-          padding: 30px 10px;
-          height: 40px;
-
-          top: auto;
-          bottom: 5px;
-          left: 5px;
-        }
-
-        #authentication-buttons.authenticated #login-info {
           display: none;
         }
       </style>
@@ -56,11 +50,15 @@ class UserInfo extends HTMLElement {
         <div id="login-info">
           <img id="logo" src="/images/anchor-watch/icon.png" />
           <p>
-            Please log in using your Apple ID to see your alarm.
+            Sign in with the same Apple ID as on your Anchor Watch device to view your alarm.
           </p>
         </div>
         <div id="apple-sign-in-button"></div>
-        <div id="apple-sign-out-button"></div>
+
+        <p class="disclaimer">
+          Your data remains completely safe and private—it never leaves your Apple account. This service operates entirely using Apple’s official client-side libraries to connect directly to Apple CloudKit. There are no intermediary servers, ensuring that all communication happens strictly between your device and Apple’s secure infrastructure. No data is ever shared with third-party services, keeping your information fully protected within Apple’s ecosystem.
+        </p>
+
       </div>
     `;
 

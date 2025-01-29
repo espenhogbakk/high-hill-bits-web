@@ -1,7 +1,7 @@
 import { fetchVesselLocations } from "../queries/index.js";
 import { StatusColor } from "../lib/index.js";
 import { MAPKIT_TOKEN } from "../config.js";
-import { database, container } from "../app.js";
+import { store, database, container } from "../app.js";
 
 class MapView extends HTMLElement {
   constructor() {
@@ -331,14 +331,12 @@ class MapView extends HTMLElement {
   async updateTrack(alarm) {
     this.lastUpdate = Date.now();
     // Fetch vessel locations for this alarm
-    const coordinates = await fetchVesselLocations(alarm.recordName).then(
-      (locations) =>
-        locations.map(
-          (loc) =>
-            new mapkit.Coordinate(
-              loc.fields.CD_latitude.value,
-              loc.fields.CD_longitude.value
-            )
+    const vesselLocations = await fetchVesselLocations(alarm.recordName);
+    const coordinates = vesselLocations.map(
+      (loc) =>
+        new mapkit.Coordinate(
+          loc.fields.CD_latitude.value,
+          loc.fields.CD_longitude.value
         )
     );
 
@@ -366,6 +364,16 @@ class MapView extends HTMLElement {
     shipOverlay.enabled = false;
     this.shipOverlay = shipOverlay;
     this.map.addOverlay(shipOverlay);
+
+    const lastKnownVesselLocation = vesselLocations.at(0);
+    if (lastKnownVesselLocation) {
+      store.lastUpdate = new Date(
+        lastKnownVesselLocation?.fields.CD_timestamp.value
+      );
+    }
+
+    const event = new CustomEvent("track-updated");
+    window.dispatchEvent(event);
   }
 }
 
